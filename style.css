@@ -67,3 +67,161 @@ button {
         padding: 12px 2px;
     }
 }
+
+
+.keyboard-container {
+    width: 100%;
+    overflow: visible;
+    margin: 25px 0;
+    padding: 0;
+}
+
+.piano {
+    --key-width: 60px;
+    --black-width: 36px;
+
+    position: relative;
+    width: 840px;
+    height: 220px;
+    margin: 0 auto;
+}
+
+.piano-key {
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.12s;
+    touch-action: manipulation;
+}
+
+.white-key {
+    position: relative;
+    flex: 0 0 var(--key-width);
+    height: 190px;
+
+    background: #f3f4f6;
+    color: #26313b;
+
+    border: 1px solid #65717c;
+    border-radius: 0 0 5px 5px;
+
+    padding-top: 145px;
+}
+
+.black-key {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+
+    width: var(--black-width);
+    height: 115px;
+
+    background: #252c36;
+    color: white;
+
+    border: 1px solid #15191e;
+    border-radius: 0 0 4px 4px;
+}
+
+/* Highlight the selected scale. */
+
+.white-key.in-scale {
+    background: #b5c7e5;
+}
+
+.black-key.in-scale {
+    background: #6586be;
+}
+
+/* Give the root note a stronger color. */
+
+.white-key.root {
+    background: #253583;
+}
+
+.black-key.root {
+    background: #253583;
+}
+
+/* Highlight a key when clicked. */
+
+.piano-key:active {
+    background: #f2c76e;
+}
+
+.keyboard-legend {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-size: 14px;
+    color: #b5c7e5;
+}
+
+.keyboard-legend span::before {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    background: #b5c7e5;
+    border-radius: 3px;
+}
+
+.keyboard-legend span:first-child::before {
+    background: #253583;
+}
+
+.keyboard-legend span:last-child::before {
+    background: #b5c7e5;
+}
+
+@media (max-width: 750px) {
+    .piano {
+        margin: 0;
+    }
+}
+
+.piano,
+.piano-key {
+    box-sizing: border-box;
+}
+
+
+/* Override the general button styling for piano keys. */
+.piano .piano-key {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border-radius: 0 0 5px 5px;
+}
+
+/* Override the general button styles for piano keys */
+.piano .piano-key {
+    position: absolute;
+    top: 0;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.piano .white-key {
+    width: 60px;
+    height: 220px;
+    padding-top: 175px;
+}
+
+.piano .black-key {
+    width: 36px;
+    height: 135px;
+}
+
+@media (max-width: 900px) {
+    .keyboard-container {
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .piano {
+        margin: 0;
+    }
+}

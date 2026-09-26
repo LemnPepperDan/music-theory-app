@@ -392,6 +392,7 @@ function displayChords() {
     if (isImprov) {
         chordHeading.textContent =
             "Select a major or minor scale to see its chords";
+            highlightKeyboard(root, type);
         return;
     }
 
@@ -424,7 +425,94 @@ function displayChords() {
         card.appendChild(noteList);
         chordResults.appendChild(card);
     });
+    highlightKeyboard(root, type);
 }
+
+
+
+const pianoKeyboard =
+    document.getElementById("pianoKeyboard");
+
+const blackNotes = [1, 3, 6, 8, 10];
+
+// Build a two-octave keyboard: C4 through B5.
+function createKeyboard() {
+    pianoKeyboard.innerHTML = "";
+
+    const keyWidth = 60;
+    const blackWidth = 36;
+
+    let whiteIndex = 0;
+
+    for (let midi = 60; midi < 84; midi++) {
+        const pitch = midi % 12;
+        const isBlack = blackNotes.includes(pitch);
+
+        const key = document.createElement("button");
+
+        key.type = "button";
+        key.className = isBlack
+            ? "piano-key black-key"
+            : "piano-key white-key";
+
+        key.dataset.pitch = pitch;
+        key.dataset.midi = midi;
+
+        const octave = Math.floor(midi / 12) - 1;
+
+        key.setAttribute(
+            "aria-label",
+            `${notes[pitch]}${octave}`
+        );
+
+        if (isBlack) {
+            // Center the black key over the boundary
+            // between two white keys.
+            key.style.left =
+                `${whiteIndex * keyWidth - blackWidth / 2}px`;
+        } else {
+            key.style.left =
+                `${whiteIndex * keyWidth}px`;
+
+            key.textContent = notes[pitch];
+
+            whiteIndex++;
+        }
+
+        // Add the completed key to the keyboard.
+        pianoKeyboard.appendChild(key);
+    }
+}
+
+function highlightKeyboard(root, type) {
+    let scale;
+
+    if (type === "major") {
+        scale = majorScale(root);
+    } else if (type in minorScaleIntervals) {
+        scale = minorScale(root, type);
+    } else if (type in improvScaleIntervals) {
+        scale = improvScale(root, type);
+    } else {
+        throw new Error("Unknown scale type");
+    }
+
+    const keys =
+        pianoKeyboard.querySelectorAll(".piano-key");
+
+    keys.forEach(key => {
+        const pitch = Number(key.dataset.pitch);
+
+        key.classList.remove("root", "in-scale");
+
+        if (pitch === root) {
+            key.classList.add("root");
+        } else if (scale.includes(pitch)) {
+            key.classList.add("in-scale");
+        }
+    });
+}
+
 
 // Update everything when the scale type changes.
 scaleType.addEventListener("change", () => {
@@ -438,5 +526,47 @@ keySelect.addEventListener("change", displayChords);
 generateButton.addEventListener("click", displayChords);
 
 // Initialize the website.
+createKeyboard();
 updateKeyNames();
 displayChords();
+
+
+let audioContext;
+
+function playNote(midi) {
+    if (!audioContext) {
+        audioContext = new AudioContext();
+    }
+
+    const frequency =
+        440 * Math.pow(2, (midi - 69) / 12);
+
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.value = frequency;
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+
+    const now = audioContext.currentTime;
+
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.3, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(
+        0.001, now + 0.6
+    );
+
+    oscillator.start(now);
+    oscillator.stop(now + 0.6);
+}
+
+// Handle clicks on the keyboard.
+pianoKeyboard.addEventListener("click", event => {
+    const key = event.target.closest(".piano-key");
+
+    if (!key) return;
+
+    playNote(Number(key.dataset.midi));
+});
