@@ -253,3 +253,15 @@ button {
 .piano .piano-key.selected.in-scale {
     background-color: #e5b84b;
 }
+
+/* Chord progression analyzer */
+.progression-section { margin: 35px 0; padding: 20px; background: #202634; border: 1px solid #485369; border-radius: 12px; }
+.progression-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.progression-controls select { max-width: 100%; }
+.progression-controls button:disabled { opacity: .45; cursor: not-allowed; }
+.progression-list { display: flex; flex-wrap: wrap; gap: 10px; min-height: 35px; }
+.progression-chord { display: flex; flex-direction: column; gap: 6px; padding: 12px 16px; border-radius: 8px; background: #29364b; border: 1px solid #75ad8b; }
+.progression-chord small { color: #d5dce7; }
+.progression-result { background: #292f3d; border-left: 4px solid #75ad8b; padding: 10px 14px; margin: 10px 0; border-radius: 5px; }
+.progression-result h4 { margin: 0 0 6px; }
+.progression-result p { margin: 0; line-height: 1.6; }

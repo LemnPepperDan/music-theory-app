@@ -82,6 +82,22 @@
 <h2>Possible Keys</h2>
 <div id="keyMatches"></div>
 
+<section class="progression-section" aria-labelledby="progressionHeading">
+    <h2 id="progressionHeading">Chord Progression Analyzer</h2>
+    <p>Select notes on the piano, choose a matching chord, then add it to your progression.</p>
+    <div class="progression-controls">
+        <label for="progressionChordChoice">Chord to add:</label>
+        <select id="progressionChordChoice"></select>
+        <button id="addProgressionChord" type="button" disabled>Add Chord</button>
+        <button id="undoProgressionChord" type="button" disabled>Remove Last</button>
+        <button id="clearProgression" type="button" disabled>Clear Progression</button>
+    </div>
+    <h3>Your Progression</h3>
+    <div id="progressionList" class="progression-list" aria-live="polite"></div>
+    <h3>Keys Containing Your Chords</h3>
+    <div id="progressionResults" aria-live="polite"></div>
+</section>
+
 <div class="keyboard-legend">
     <span>Root note</span>
     <span>Scale note</span>

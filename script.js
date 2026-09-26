@@ -671,6 +671,9 @@ keySelect.addEventListener("change", displayChords);
 
 generateButton.addEventListener("click", displayChords);
 
+
+
+
 let audioContext;
 
 function playNote(midi) {
@@ -749,8 +752,145 @@ clearSelectionButton.addEventListener("click", () => {
     updateAnalysis();
 });
 
-// Initialize the website.
+// PROGRESSION ANALYZER
+// Each saved chord is a snapshot; changing the piano selection won't alter it.
+const progression = [];
+const addProgressionChordButton = document.getElementById("addProgressionChord");
+const chordChoice = document.getElementById("progressionChordChoice");
+const progressionList = document.getElementById("progressionList");
+const progressionResults = document.getElementById("progressionResults");
+const undoProgressionChordButton = document.getElementById("undoProgressionChord");
+const clearProgressionButton = document.getElementById("clearProgression");
+
+const romanNumerals = ["I", "II", "III", "IV", "V", "VI", "VII"];
+
+function updateChordChoice() {
+    const matches = selectedNotes.size ? findMatchingChords(selectedNotes) : [];
+    chordChoice.replaceChildren();
+    for (const chord of matches) {
+        const option = document.createElement("option");
+        option.value = `${chord.root}:${chord.type}`;
+        option.textContent = `${notes[chord.root]} ${chord.type}`;
+        chordChoice.appendChild(option);
+    }
+    addProgressionChordButton.disabled = matches.length === 0;
+    if (!matches.length) {
+        const option = document.createElement("option");
+        option.textContent = selectedNotes.size
+            ? "No exact chord match — adjust selected notes"
+            : "Select a chord on the piano first";
+        chordChoice.appendChild(option);
+    }
+}
+
+// Determine which scale degree the saved chord's root occupies.
+function progressionDegree(chord, scale) {
+    const index = scale.indexOf(chord.root);
+    if (index === -1) return "chromatic root";
+    let numeral = romanNumerals[index];
+    if (["minor", "minor7", "minorMajor7"].includes(chord.type)) {
+        numeral = numeral.toLowerCase();
+    } else if (["diminished", "diminished7", "halfDiminished7"].includes(chord.type)) {
+        numeral = numeral.toLowerCase() + "°";
+    }
+    return numeral;
+}
+
+// These are pitch-collection matches, not assertions about the tonal center.
+function analyzeProgression(chords) {
+    if (!chords.length) return [];
+    const candidates = [];
+    for (let root = 0; root < 12; root++) {
+        const scales = [
+            { name: `${majorKeyNames[root]} major`, pitches: majorScale(root) },
+            { name: `${minorKeyNames[root]} natural minor`, pitches: minorScale(root, "natural") },
+            { name: `${minorKeyNames[root]} harmonic minor`, pitches: minorScale(root, "harmonic") }
+        ];
+        for (const scale of scales) {
+            const chordFits = chords.map(chord =>
+                chord.pitches.every(pitch => scale.pitches.includes(pitch))
+            );
+            const count = chordFits.filter(Boolean).length;
+            candidates.push({ ...scale, count, chordFits });
+        }
+    }
+    return candidates.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+}
+
+function renderProgression() {
+    progressionList.replaceChildren();
+    for (const [index, chord] of progression.entries()) {
+        const card = document.createElement("div");
+        card.className = "progression-chord";
+        const name = document.createElement("strong");
+        name.textContent = `${index + 1}. ${chord.label}`;
+        const pitches = document.createElement("small");
+        pitches.textContent = chord.pitches.map(p => notes[p]).join(" – ");
+        card.append(name, pitches);
+        progressionList.appendChild(card);
+    }
+    undoProgressionChordButton.disabled = progression.length === 0;
+    clearProgressionButton.disabled = progression.length === 0;
+    progressionResults.replaceChildren();
+    if (!progression.length) {
+        progressionResults.textContent = "Add at least one chord to compare possible keys.";
+        return;
+    }
+    const results = analyzeProgression(progression);
+    const exact = results.filter(result => result.count === progression.length);
+    const shown = exact.length ? exact : results.filter(result => result.count === results[0].count);
+    const explanation = document.createElement("p");
+    explanation.textContent = exact.length
+        ? `These ${exact.length} scale(s) contain every note of every saved chord. This alone cannot determine the tonal center.`
+        : `No tested scale contains every chord. Showing scales containing the most chords (${results[0].count} of ${progression.length}); the others may be borrowed or chromatic.`;
+    progressionResults.appendChild(explanation);
+    for (const result of shown) {
+        const card = document.createElement("div");
+        card.className = "progression-result";
+        const heading = document.createElement("h4");
+        heading.textContent = `${result.name} — ${result.count}/${progression.length} chords`;
+        const detail = document.createElement("p");
+        detail.textContent = progression.map((chord, i) =>
+            `${chord.label}: ${result.chordFits[i] ? progressionDegree(chord, result.pitches) : "outside scale"}`
+        ).join("  |  ");
+        card.append(heading, detail);
+        progressionResults.appendChild(card);
+    }
+}
+
+addProgressionChordButton.addEventListener("click", () => {
+    const [rootText, type] = chordChoice.value.split(":");
+    if (!type || !chordFormulas[type]) return;
+    const root = Number(rootText);
+    const pitches = [...new Set(buildChord(root, type))];
+    // Guard against stale selection or an altered dropdown.
+    if (pitches.length !== selectedNotes.size ||
+        !pitches.every(pitch => selectedNotes.has(pitch))) return;
+    progression.push({ root, type, pitches, label: `${notes[root]} ${type}` });
+    selectedNotes.clear();
+    updateAnalysis();
+    renderProgression();
+});
+
+undoProgressionChordButton.addEventListener("click", () => {
+    progression.pop();
+    renderProgression();
+});
+clearProgressionButton.addEventListener("click", () => {
+    progression.length = 0;
+    renderProgression();
+});
+
+// Keep the chord dropdown synchronized with every selection/clear action.
+const previousUpdateAnalysis = updateAnalysis;
+updateAnalysis = function () {
+    previousUpdateAnalysis();
+    updateChordChoice();
+};
+
+// All variables and listeners are ready before initialization.
 createKeyboard();
 updateKeyNames();
 displayChords();
 updateAnalysis();
+renderProgression();
