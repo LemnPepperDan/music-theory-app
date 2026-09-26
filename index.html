@@ -9,8 +9,31 @@
 </head>
 <body>
     <h1>Music Theory App</h1>
-    <p>My first music theory project!</p>
+    <p>Select a key to discover its chords.</p>
+
+    <label for="keySelect">Choose a key:</label>
+
+    <select id="keySelect">
+        <option value="0">C Major</option>
+        <option value="1">C# Major</option>
+        <option value="2">D Major</option>
+        <option value="3">Eb Major</option>
+        <option value="4">E Major</option>
+        <option value="5">F Major</option>
+        <option value="6">F# Major</option>
+        <option value="7">G Major</option>
+        <option value="8">Ab Major</option>
+        <option value="9">A Major</option>
+        <option value="10">Bb Major</option>
+        <option value="11">B Major</option>
+    </select>
+
+    <button id="generateButton">
+        Generate Chords
+    </button>
+
+    <h2>Chords in this key</h2>
+    <div id="chordResults"></div>
 
     <script src="script.js"></script>
 </body>
-</html>

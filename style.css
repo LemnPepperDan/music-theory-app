@@ -1,0 +1,40 @@
+body {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #171b24;
+    color: rgb(242, 240, 145);
+}
+
+select, button {
+    padding: 12px;
+    margin: 10px 5px;
+    font-size: 16px;
+    border-radius: 8px;
+}
+
+button {
+    background-color: #152a68;
+    border: none;
+    cursor: pointer;
+}
+
+#chordResults {
+    display: grid;
+    grid-template-columns:
+        repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.chord-card {
+    background-color: #292f3d;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #444b5c;
+}
+
+.chord-card h3 {
+    color: rgb(242, 240, 145);
+}

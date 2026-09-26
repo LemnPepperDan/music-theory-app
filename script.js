@@ -84,3 +84,40 @@ dMajorChords.forEach(chord => {
         chord.notes.map(n => notes[n])
     );
 });
+
+
+const keySelect = document.getElementById("keySelect");
+const generateButton =
+    document.getElementById("generateButton");
+const chordResults =
+    document.getElementById("chordResults");
+
+function displayChords() {
+    const root = Number(keySelect.value);
+
+    const chords = chordsInMajorKey(root);
+
+    chordResults.innerHTML = "";
+
+    chords.forEach(chord => {
+        const card = document.createElement("div");
+        card.className = "chord-card";
+
+        const title = document.createElement("h3");
+        title.textContent =
+            `${chord.numeral} - ${notes[chord.root]} ${chord.quality}`;
+
+        const noteList = document.createElement("p");
+        noteList.textContent =
+            chord.notes.map(n => notes[n]).join(" - ");
+
+        card.appendChild(title);
+        card.appendChild(noteList);
+        chordResults.appendChild(card);
+    });
+}
+
+generateButton.addEventListener("click", displayChords);
+
+// Display C major when the page first loads.
+displayChords();
