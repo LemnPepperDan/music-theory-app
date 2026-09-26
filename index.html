@@ -12,21 +12,52 @@
     <p>Select a key to discover its chords.</p>
 
     <label for="keySelect">Choose a key:</label>
+<select id="keySelect">
+    <option value="0">C</option>
+    <option value="1">C#</option>
+    <option value="2">D</option>
+    <option value="3">Eb</option>
+    <option value="4">E</option>
+    <option value="5">F</option>
+    <option value="6">F#</option>
+    <option value="7">G</option>
+    <option value="8">Ab</option>
+    <option value="9">A</option>
+    <option value="10">Bb</option>
+    <option value="11">B</option>
+</select>
 
-    <select id="keySelect">
-        <option value="0">C Major</option>
-        <option value="1">C# Major</option>
-        <option value="2">D Major</option>
-        <option value="3">Eb Major</option>
-        <option value="4">E Major</option>
-        <option value="5">F Major</option>
-        <option value="6">F# Major</option>
-        <option value="7">G Major</option>
-        <option value="8">Ab Major</option>
-        <option value="9">A Major</option>
-        <option value="10">Bb Major</option>
-        <option value="11">B Major</option>
-    </select>
+<label for="scaleType">Scale type:</label>
+<select id="scaleType">
+    <option value="major">Major</option>
+    <option value="natural">Natural Minor</option>
+    <option value="harmonic">Harmonic Minor</option>
+    <option value="melodic">Melodic Minor</option>
+    <optgroup label="Improvisation">
+    <option value="majorPentatonic">
+        Major Pentatonic
+    </option>
+    <option value="minorPentatonic">
+        Minor Pentatonic
+    </option>
+    <option value="majorBlues">
+        Major Blues
+    </option>
+    <option value="minorBlues">
+        Minor Blues
+    </option>
+    <option value="dorian">Dorian</option>
+    <option value="mixolydian">Mixolydian</option>
+</optgroup>
+</select>
+
+<button id="generateButton">Generate Chords</button>
+
+<h2 id="scaleTitle">Scale</h2>
+<div id="scaleResults"></div>
+
+<h2>Chords in this key</h2>
+<div id="chordResults"></div>
 
     <button id="generateButton">
         Generate Chords
