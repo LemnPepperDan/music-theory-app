@@ -16,6 +16,7 @@ select, button {
 
 button {
     background-color: #152a68;
+    color: rgb(242, 240, 145);
     border: none;
     cursor: pointer;
 }
