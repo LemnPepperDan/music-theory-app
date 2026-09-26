@@ -414,9 +414,22 @@ function displayChords() {
             );
         }
 
+        const majorNumerals = [
+            "I", "ii", "iii", "IV", "V", "vi", "vii°"
+        ];
+
+        const minorNumerals = [
+            "i", "ii", "III", "iv", "v", "VI", "VII"
+        ];
+
+        const numerals = isMajor
+            ? majorNumerals
+            : minorNumerals;
+
         const title = document.createElement("h3");
+
         title.textContent =
-            `${spelledScale[i]} ${chord.quality}`;
+            `${numerals[i]} — ${spelledScale[i]} ${chord.quality}`;
 
         const noteList = document.createElement("p");
         noteList.textContent = chordNotes.join(" - ");
