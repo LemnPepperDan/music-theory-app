@@ -671,13 +671,6 @@ keySelect.addEventListener("change", displayChords);
 
 generateButton.addEventListener("click", displayChords);
 
-// Initialize the website.
-createKeyboard();
-updateKeyNames();
-displayChords();
-updateAnalysis();
-
-
 let audioContext;
 
 function playNote(midi) {
@@ -755,3 +748,9 @@ clearSelectionButton.addEventListener("click", () => {
     selectedNotes.clear();
     updateAnalysis();
 });
+
+// Initialize the website.
+createKeyboard();
+updateKeyNames();
+displayChords();
+updateAnalysis();
