@@ -225,3 +225,31 @@ button {
         margin: 0;
     }
 }
+
+.analysis-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+}
+
+.piano .piano-key.selected {
+    background: #e5b84b;
+}
+
+.analysis-result {
+    display: inline-block;
+    background: #292f3d;
+    border: 1px solid #6880b9;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 5px;
+}
+
+/* Selected notes override normal scale highlighting */
+.piano .piano-key.selected,
+.piano .piano-key.selected.root,
+.piano .piano-key.selected.in-scale {
+    background-color: #e5b84b;
+}

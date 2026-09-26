@@ -513,6 +513,152 @@ function highlightKeyboard(root, type) {
     });
 }
 
+function findMatchingChords(selected) {
+    const matches = [];
+
+    for (let root = 0; root < 12; root++) {
+        for (const [type, intervals]
+            of Object.entries(chordFormulas)) {
+
+            const chordNotes = intervals.map(interval =>
+                transpose(root, interval)
+            );
+
+            // Ignore octave duplicates in chord formulas.
+            const uniqueNotes = new Set(chordNotes);
+
+            const exactMatch =
+                uniqueNotes.size === selected.size &&
+                [...uniqueNotes].every(note =>
+                    selected.has(note)
+                );
+
+            if (exactMatch) {
+                matches.push({
+                    root,
+                    type,
+                    notes: [...uniqueNotes]
+                });
+            }
+        }
+    }
+
+    return matches;
+}
+
+function findMatchingKeys(selected) {
+    const matches = [];
+
+    for (let root = 0; root < 12; root++) {
+        const scales = [
+            { type: "major", notes: majorScale(root) },
+            {
+                type: "natural minor",
+                notes: minorScale(root, "natural")
+            },
+            {
+                type: "harmonic minor",
+                notes: minorScale(root, "harmonic")
+            },
+            {
+                type: "melodic minor",
+                notes: minorScale(root, "melodic")
+            }
+        ];
+
+        for (const scale of scales) {
+            const containsAll =
+                [...selected].every(note =>
+                    scale.notes.includes(note)
+                );
+
+            if (containsAll) {
+                matches.push({
+                    root,
+                    type: scale.type
+                });
+            }
+        }
+    }
+
+    return matches;
+}
+
+function updateAnalysis() {
+    // Highlight selected notes on the piano.
+    const keys =
+        pianoKeyboard.querySelectorAll(".piano-key");
+
+    keys.forEach(key => {
+        const pitch = Number(key.dataset.pitch);
+
+        key.classList.toggle(
+            "selected",
+            selectedNotes.has(pitch)
+        );
+    });
+
+    // Display the selected notes.
+    selectedNotesDisplay.textContent =
+        [...selectedNotes]
+            .sort((a, b) => a - b)
+            .map(pitch => notes[pitch])
+            .join(" - ") || "No notes selected";
+
+    // Identify matching chords.
+    const chordMatches =
+        findMatchingChords(selectedNotes);
+
+    chordMatchesDisplay.innerHTML = "";
+
+    if (selectedNotes.size === 0) {
+        chordMatchesDisplay.textContent =
+            "Select notes to identify a chord.";
+    } else if (chordMatches.length === 0) {
+        chordMatchesDisplay.textContent =
+            "No exact chord matches found.";
+    } else {
+        chordMatches.forEach(chord => {
+            const item = document.createElement("div");
+            item.className = "analysis-result";
+
+            item.textContent =
+                `${notes[chord.root]} ${chord.type}`;
+
+            chordMatchesDisplay.appendChild(item);
+        });
+    }
+
+    // Identify possible keys.
+    const keyMatches =
+        selectedNotes.size > 0
+            ? findMatchingKeys(selectedNotes)
+            : [];
+
+    keyMatchesDisplay.innerHTML = "";
+
+    keyMatches.forEach(key => {
+        const item = document.createElement("div");
+        item.className = "analysis-result";
+
+        const keyName = key.type === "major"
+            ? majorKeyNames[key.root]
+            : minorKeyNames[key.root];
+
+        item.textContent =
+            `${keyName} ${key.type}`;
+
+        keyMatchesDisplay.appendChild(item);
+    });
+
+    if (keyMatches.length === 0) {
+        keyMatchesDisplay.textContent =
+            selectedNotes.size === 0
+                ? "Select notes to find possible keys."
+                : "No matching major or minor scales found.";
+    }
+}
+
 
 // Update everything when the scale type changes.
 scaleType.addEventListener("change", () => {
@@ -529,6 +675,7 @@ generateButton.addEventListener("click", displayChords);
 createKeyboard();
 updateKeyNames();
 displayChords();
+updateAnalysis();
 
 
 let audioContext;
@@ -561,6 +708,32 @@ function playNote(midi) {
     oscillator.start(now);
     oscillator.stop(now + 0.6);
 }
+const selectedNotes = new Set();
+
+const selectionMode =
+    document.getElementById("selectionMode");
+
+const selectedNotesDisplay =
+    document.getElementById("selectedNotes");
+
+const chordMatchesDisplay =
+    document.getElementById("chordMatches");
+
+const keyMatchesDisplay =
+    document.getElementById("keyMatches");
+
+const clearSelectionButton =
+    document.getElementById("clearSelection");
+
+function toggleSelectedNote(pitch) {
+    if (selectedNotes.has(pitch)) {
+        selectedNotes.delete(pitch);
+    } else {
+        selectedNotes.add(pitch);
+    }
+
+    updateAnalysis();
+}
 
 // Handle clicks on the keyboard.
 pianoKeyboard.addEventListener("click", event => {
@@ -568,5 +741,17 @@ pianoKeyboard.addEventListener("click", event => {
 
     if (!key) return;
 
-    playNote(Number(key.dataset.midi));
+    const midi = Number(key.dataset.midi);
+    const pitch = Number(key.dataset.pitch);
+
+    playNote(midi);
+
+    if (selectionMode.checked) {
+        toggleSelectedNote(pitch);
+    }
+});
+
+clearSelectionButton.addEventListener("click", () => {
+    selectedNotes.clear();
+    updateAnalysis();
 });
