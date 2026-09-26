@@ -85,6 +85,63 @@ dMajorChords.forEach(chord => {
     );
 });
 
+const naturalPitches = {
+    C: 0,
+    D: 2,
+    E: 4,
+    F: 5,
+    G: 7,
+    A: 9,
+    B: 11
+};
+
+const letters = ["C", "D", "E", "F", "G", "A", "B"];
+
+// Match the spellings in our HTML key selector.
+const majorKeyNames = [
+    "C", "C#", "D", "Eb", "E", "F",
+    "F#", "G", "Ab", "A", "Bb", "B"
+];
+
+function spellMajorScale(root) {
+    const pitches = majorScale(root);
+    const rootName = majorKeyNames[root];
+
+    // Extract the root's letter, ignoring its accidental.
+    const rootLetter = rootName[0];
+    const start = letters.indexOf(rootLetter);
+
+    return pitches.map((pitch, i) => {
+        // Advance one letter for every scale degree.
+        const letter = letters[(start + i) % 7];
+
+        // Find the semitone difference from its natural pitch.
+        let difference =
+            (pitch - naturalPitches[letter] + 12) % 12;
+
+        // Express downward adjustments as negative values.
+        if (difference > 6) {
+            difference -= 12;
+        }
+
+        const accidentals = {
+            "-2": "bb",
+            "-1": "b",
+            "0": "",
+            "1": "#",
+            "2": "##"
+        };
+
+        if (!(difference in accidentals)) {
+            throw new Error("Unsupported note spelling");
+        }
+
+        return letter + accidentals[difference];
+    });
+}
+console.log(spellMajorScale(1));
+// C#, D#, E#, F#, G#, A#, B#
+
 
 const keySelect = document.getElementById("keySelect");
 const generateButton =
@@ -97,25 +154,43 @@ function displayChords() {
 
     const chords = chordsInMajorKey(root);
 
+    const spelledScale = spellMajorScale(root);
+
     chordResults.innerHTML = "";
 
-    chords.forEach(chord => {
-        const card = document.createElement("div");
-        card.className = "chord-card";
+    chords.forEach((chord, i) => {
+    const card = document.createElement("div");
+    card.className = "chord-card";
 
-        const title = document.createElement("h3");
-        title.textContent =
-            `${chord.numeral} - ${notes[chord.root]} ${chord.quality}`;
+    // Get the correctly spelled root.
+    const chordRoot = spelledScale[i];
 
-        const noteList = document.createElement("p");
-        noteList.textContent =
-            chord.notes.map(n => notes[n]).join(" - ");
+    // Select alternating scale degrees.
+    const chordNotes = [
+        spelledScale[i],
+        spelledScale[(i + 2) % 7],
+        spelledScale[(i + 4) % 7]
+    ];
 
-        card.appendChild(title);
-        card.appendChild(noteList);
-        chordResults.appendChild(card);
-    });
+    // Include the seventh if this is a seventh chord.
+    if (chord.notes.length === 4) {
+        chordNotes.push(spelledScale[(i + 6) % 7]);
+    }
+
+    const title = document.createElement("h3");
+    title.textContent =
+        `${chord.numeral} - ${chordRoot} ${chord.quality}`;
+
+    const noteList = document.createElement("p");
+    noteList.textContent = chordNotes.join(" - ");
+
+    card.appendChild(title);
+    card.appendChild(noteList);
+    chordResults.appendChild(card);
+});
 }
+
+
 
 generateButton.addEventListener("click", displayChords);
 
